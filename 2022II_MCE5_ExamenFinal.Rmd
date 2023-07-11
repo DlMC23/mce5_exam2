@@ -76,6 +76,18 @@ Realizar los siguientes análisis y respectivas interpretaciones:
 
 5. Validez del modelo.
 
+#Análisis exploratorio
+```{r, "analisis exploratorio"}
+library(readxl)
+glm <- read_excel("glm.xlsx")
+View(glm)
+head(glm)
+str(glm)
+summary(glm)
+```
+**explicación** Se realizó un análisis exploratorio de la data glm, esta data contiene información  de insecticidas para controlar el número de mosquitos, donde se cargo la data, se usó la librería readxl, con view(glm) se visualizó la información, head(glm) para visualizar los primeros  6 datos,  str(glm) para viszualizar si las variables son numéricas o categóricas. 
+
+
 
 
 
