@@ -1,9 +1,11 @@
 ---
 title: "Métodos Cuantitativos en Ecología - MCE5"
-subtitle: "EXAMEN FINAL - 2022II"
-author: 'David Grefa'
+author: "David Grefa"
 date: "`r Sys.Date()`"
 output:
+  word_document:
+    toc: yes
+    toc_depth: '4'
   html_document:
     toc: yes
     toc_depth: 4
@@ -12,6 +14,7 @@ output:
     toc_float:
       collapsed: no
       smooth_scroll: yes
+subtitle: "EXAMEN FINAL - 2022II"
 ---
 
 ```{r echo = FALSE, results = 'asis'}
@@ -76,7 +79,7 @@ Realizar los siguientes análisis y respectivas interpretaciones:
 
 5. Validez del modelo.
 
-#Análisis exploratorio
+#1_Análisis exploratorio
 ```{r, "analisis exploratorio"}
 library(readxl)
 glm <- read_excel("glm.xlsx")
@@ -85,11 +88,79 @@ head(glm)
 str(glm)
 summary(glm)
 ```
-**explicación** Se realizó un análisis exploratorio de la data glm, esta data contiene información  de insecticidas para controlar el número de mosquitos, donde se cargo la data, se usó la librería readxl, con view(glm) se visualizó la información, head(glm) para visualizar los primeros  6 datos,  str(glm) para viszualizar si las variables son numéricas o categóricas. 
+**descripción** Se realizó un análisis exploratorio de la data glm, esta data contiene información  de insecticidas para controlar el número de mosquitos, donde se cargo la data, se usó la librería readxl, con view(glm) se visualizó la información, head(glm) para visualizar los primeros  6 datos,  str(glm) para viszualizar si las variables son numéricas o categóricas. 
+#2_Planteamiento de hipótesis para cada modelo
+
+**hipótesis**la Aplicación repetida de insecticidas en un experimento para controlar el número de mosquitos de Aedes reduce efectivamente su población.a.
+
+**Hipótesis**: La edad tiene un efecto en la presencia o ausencia de las variables
+
+**Hipótesis**: Las variables relacionadas con la concentración y afectación de ciertas células se relacionan con la presencia/ausencia de infección causad por leishmania.
 
 
 
+#3_Análisis de regresión para aedes, leishmania, disease
 
+#Análisis GLM poisson en aedes
+```{r}
+glm <- read_excel("glm.xlsx", sheet = "aedes")
+
+# Convertir la variable a factor
+glm$agrochem <- factor(glm$agrochem)
+
+# Realizar el análisis GLM Poisson
+glm_poisson_model <- glm(aedes ~ agrochem + repetition, data = glm, family = poisson)
+summary(glm_poisson_model)
+
+# Visualizar los coeficientes estimados del modelo
+coef(glm_poisson_model)
+print(glm_poisson_model)
+#vizualización 
+plot(glm_poisson_model)
+```
+**Descripción** la variable agroquimica tiene efecto significativo en la variable de respuesta. Los todos los niveles de los agroquimicos,se relacionan con la disminucion en la cantidad de mosquitos con el nivel A, mientras mas repeticiones hay se reduce el número demoquitos 
+
+#Análisis GLMs binomiales en disease
+```{r}
+glm_disease <- read_excel("glm.xlsx", sheet = "disease")
+View(glm)
+
+# Convertir la variable a  factor
+glm_disease$recover <- factor(glm_disease$recover)
+
+# Realizar el análisis GLM binomial
+glm_binomial_model <- glm(recover ~ native + gender + treatment + age, data = glm_disease, family = binomial)
+
+summary(glm_binomial_model)
+
+# Visualizar los coeficientes estimados del modelo
+coef(glm_binomial_model)
+print(glm_binomial_model)
+plot(glm_binomial_model)
+
+```
+**descripción** Las variables "native", "gender", "treatment" y "age" tienen efectos diferentes en la variable de respuesta "recover". El intercepto muestra una menor probabilidad de recuperación en ausencia de otras variables predictoras. El tratamiento se asocia con una mayor probabilidad de recuperación, mientras que la edad también influye de forma positiva enn en esta probabilidad.
+
+
+
+#Análisis bayesiano para leishmania
+```{r}
+library(rstanarm)
+
+glm_leishmania <- read_excel("glm.xlsx", sheet = "leishmania")
+View(glm_leishmania)
+
+# Realizar el análisis GLM bayesiano
+bayesian_glm_model <- stan_glm(recupera ~ percent_blast + percent_affect + percent_leuco + periferia_leuco + periferia_blast + temperature, data = glm_leishmania, family = gaussian())
+
+# Obtener un resumen del modelo
+summary(bayesian_glm_model)
+print(bayesian_glm_model)
+plot(bayesian_glm_model)
+
+```
+**explicación** se obtuvo estimaciones de coeficientes para las variables predictoras que indican el efecto de cada una de ellas en la variable de respuesta "recupera".Se observó que un aumento en "percent_blast" se relaciona con un incremento en la variable de respuesta, mientras que un aumento en "percent_affect" se relaciona con una disminución en la variable de respuesta.
+#
 
 
 ## **PREGUNTA 2: Series de tiempo [3 PUNTOS]**
@@ -107,6 +178,24 @@ En el archivo `"ts.xlsx"` tiene tres datos:
 Realizar los siguientes análisis y respectivas interpretaciones: 
 
 1. Análisis exploratorio: autocorrelación y descomposición, análisis estacional.
+
+```{r,series de tiempo }
+library(readxl)
+library(forecast)
+library(ggplot2)
+
+##QUAKES
+data_quakes <- read_excel("ts.xlsx", sheet = "quakes")
+quakes <- data_quakes$quakes
+
+# Datos en una serie de tiempo
+ts_quakes <- ts(data_quakes, start = c(2000, 1), frequency = 1)
+
+# Autocorrelación
+acf(ts_quakes, main = "Autocorrelation of quakes")
+
+```
+
 
 2. ARIMA, SARIMA, ETS, NNAR
 
@@ -139,4 +228,54 @@ Seleccione una especie de planta y una especie de animal; asimismo, dos tipos de
 - Chirimoya: *Anona cherimola*
 
 Luego realice un análisis espacial de distribución de la especie en Ecuador continental en base a los datos de presencia del GBIF (use rgbif para descargar la data). Explique el resultado y compare la diferencia entre la salida de los dos modelos. En qué regiones los modelos difieren más en la predicción?   
+
+```{r}
+library(rgbif)
+library(tidyverse)
+#ESPECIE DE ANIMAL
+occ <- occ_data(scientificName = 'Puma concolor', 
+                limit = 200000, 
+                hasCoordinate = TRUE, 
+                hasGeospatialIssue = FALSE)
+
+Datos_puma <- filter(occ$data, country == 'Ecuador')
+shp <- raster::getData('GADM', country = 'ECU', level = 1)
+
+ggplot() +
+  geom_point(data = Datos_puma, aes(x = decimalLongitude, y = decimalLatitude), color = 'black') +
+  geom_polygon(data = shp, aes(x = long, y = lat, group = group), color = 'grey', fill = NA) +
+  coord_fixed(ylim = c(-5, 2.5), xlim = c(-92.5, -30)) +
+  xlab('Longitud') +
+  ylab('Latitud')
+
+```
+**descripcion** Se utilizaron las librerias rgbif y tidyverse para obtener datos de ocurrencia de la especie "Puma concolor" en Ecuador utilizando de GBIF. Luego, se filtran los registros para seleccionar con coordenadas geográficas válidas y se visualizan en un gráfico de puntos sobre un mapa de Ecuador. El objetivo es identificar las ubicaciones donde se han registrado avistamientos de pumas en el país y evaluar su distribución geográfica.
+
+
+```{r}
+library(rgbif)
+library(tidyverse)
+
+##ESPECIE DE PLANTA
+
+occ <- occ_data(scientificName = 'Ceiba pentandra', 
+                limit = 200000, 
+                hasCoordinate = TRUE, 
+                hasGeospatialIssue = FALSE)
+
+Datos_ceiba <- filter(occ$data, country == 'Ecuador')
+
+shp <- raster::getData('GADM', country = 'ECU', level = 1)
+
+ggplot() +
+  geom_point(data = Datos_ceiba, aes(x = decimalLongitude, y = decimalLatitude), color = 'black') +
+  geom_polygon(data = shp, aes(x = long, y = lat, group = group), color = 'grey', fill = NA) +
+  coord_fixed(ylim = c(-5, 2.5), xlim = c(-92.5, -30)) +
+  xlab('Longitud') +
+  ylab('Latitud')
+
+
+```
+**descripcion**  Se obtuvo datos de la ocurrencia de la especie Ceiba pentandra en el Ecuador, utilizando GBIF, se filtraron los registros para la seleccion con las coordenadas válidas y finalmente se logra vizualizar la distribución de la sp, dentro del mapa.
+
 
