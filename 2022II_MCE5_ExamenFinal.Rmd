@@ -3,9 +3,6 @@ title: "Métodos Cuantitativos en Ecología - MCE5"
 author: "David Grefa"
 date: "`r Sys.Date()`"
 output:
-  word_document:
-    toc: yes
-    toc_depth: '4'
   html_document:
     toc: yes
     toc_depth: 4
@@ -14,6 +11,12 @@ output:
     toc_float:
       collapsed: no
       smooth_scroll: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+  word_document:
+    toc: yes
+    toc_depth: '4'
 subtitle: "EXAMEN FINAL - 2022II"
 ---
 
@@ -229,53 +232,6 @@ Seleccione una especie de planta y una especie de animal; asimismo, dos tipos de
 
 Luego realice un análisis espacial de distribución de la especie en Ecuador continental en base a los datos de presencia del GBIF (use rgbif para descargar la data). Explique el resultado y compare la diferencia entre la salida de los dos modelos. En qué regiones los modelos difieren más en la predicción?   
 
-```{r}
-library(rgbif)
-library(tidyverse)
-#ESPECIE DE ANIMAL
-occ <- occ_data(scientificName = 'Puma concolor', 
-                limit = 200000, 
-                hasCoordinate = TRUE, 
-                hasGeospatialIssue = FALSE)
 
-Datos_puma <- filter(occ$data, country == 'Ecuador')
-shp <- raster::getData('GADM', country = 'ECU', level = 1)
-
-ggplot() +
-  geom_point(data = Datos_puma, aes(x = decimalLongitude, y = decimalLatitude), color = 'black') +
-  geom_polygon(data = shp, aes(x = long, y = lat, group = group), color = 'grey', fill = NA) +
-  coord_fixed(ylim = c(-5, 2.5), xlim = c(-92.5, -30)) +
-  xlab('Longitud') +
-  ylab('Latitud')
-
-```
-**descripcion** Se utilizaron las librerias rgbif y tidyverse para obtener datos de ocurrencia de la especie "Puma concolor" en Ecuador utilizando de GBIF. Luego, se filtran los registros para seleccionar con coordenadas geográficas válidas y se visualizan en un gráfico de puntos sobre un mapa de Ecuador. El objetivo es identificar las ubicaciones donde se han registrado avistamientos de pumas en el país y evaluar su distribución geográfica.
-
-
-```{r}
-library(rgbif)
-library(tidyverse)
-
-##ESPECIE DE PLANTA
-
-occ <- occ_data(scientificName = 'Ceiba pentandra', 
-                limit = 200000, 
-                hasCoordinate = TRUE, 
-                hasGeospatialIssue = FALSE)
-
-Datos_ceiba <- filter(occ$data, country == 'Ecuador')
-
-shp <- raster::getData('GADM', country = 'ECU', level = 1)
-
-ggplot() +
-  geom_point(data = Datos_ceiba, aes(x = decimalLongitude, y = decimalLatitude), color = 'black') +
-  geom_polygon(data = shp, aes(x = long, y = lat, group = group), color = 'grey', fill = NA) +
-  coord_fixed(ylim = c(-5, 2.5), xlim = c(-92.5, -30)) +
-  xlab('Longitud') +
-  ylab('Latitud')
-
-
-```
-**descripcion**  Se obtuvo datos de la ocurrencia de la especie Ceiba pentandra en el Ecuador, utilizando GBIF, se filtraron los registros para la seleccion con las coordenadas válidas y finalmente se logra vizualizar la distribución de la sp, dentro del mapa.
 
 
