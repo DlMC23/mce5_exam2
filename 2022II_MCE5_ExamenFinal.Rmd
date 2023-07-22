@@ -36,7 +36,7 @@ Los contenidos de esta evaluación corresponden a los temas:
 -   Análisis espacial
 
 
-Ustedes estan utilizando un archivo tipo R Markdown (`.Rmd`). Las instruciones son **[1 PUNTO]**:
+Ustedes estan utilizando un archivo tipo R Markdown (`.Rmd`). Las instruciones son **[1 PUNTO]**::
 
 -   Bifurquen el repositorio en GitHub y clonen en su computador usando un proyecto con control de la versión de RStudio.
 
