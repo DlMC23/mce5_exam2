@@ -1,6 +1,6 @@
 ---
 title: "Métodos Cuantitativos en Ecología - MCE5"
-author: "David Grefaaa5"
+author: "David Grefaaagh5"
 date: "`r Sys.Date()`"
 output:
   html_document:
