@@ -111,6 +111,7 @@ En el resumen estadístistico se puede observar como se distriubuyen los datos d
 ```{r, poisson GLM}
 
 glm <- read_excel("glm.xlsx", sheet = "aedes")
+View(glm)
 
 # Convertir la variable a factor
 glm$agrochem <- factor(glm$agrochem)
@@ -124,26 +125,41 @@ coef(glm_poisson_model)
 print(glm_poisson_model)
 #vizualización 
 plot(glm_poisson_model)
+#Calcular AIC del modelo
+AIC(glm_poisson_model)
 ```
 **Descripción** Poisson se utilizó para analizar la variable respuesta AEDES(número de mosquitos vivos) en función de las variables predictorias AGROCHEM y REPETICIONES. Donde se obtiene que la variable agrochem y el número de repeticiones (predictorias) tiene efecto significativo en la la cantidad de mosquitos que sobreviven. Todos los niveles de los agroquimicos,se relacionan con la disminucion en la cantidad de mosquitos con el nivel A, mientras mas repeticiones hay se reduce el número de moquitos pero tambien se puede observar que el mejor tipo de agrochem es el E al realizar el número de repeticiones con el tipo de agrochem E, reduce el mayor número de moquitos en comparacion a los demas agrochem.
 
 #Análisis GLMs binomiales en disease
 ```{r}
-glm_disease <- read_excel("glm.xlsx", sheet = "disease")
-View(glm)
+library(readxl)
+library(dplyr)
 
-# Convertir la variable a  factor
+# Cargar los datos
+glm_disease <- read_excel("glm.xlsx", sheet = "disease")
+
+# Convertir las variables a factor
+glm_disease$native <- factor(glm_disease$native)
+glm_disease$gender <- factor(glm_disease$gender)
+glm_disease$treatment <- factor(glm_disease$treatment)
 glm_disease$recover <- factor(glm_disease$recover)
 
 # Realizar el análisis GLM binomial
-glm_binomial_model <- glm(recover ~ native + gender + treatment + age, data = glm_disease, family = binomial)
+glm_binomial_model <- glm(recover ~ native + gender + treatment + age, data = glm_disease, family = binomial(link = "logit"))
 
+# Obtener un resumen del modelo
 summary(glm_binomial_model)
 
-# Visualizar los coeficientes estimados del modelo
+# Visualizar los coeficientes del modelo
 coef(glm_binomial_model)
 print(glm_binomial_model)
 plot(glm_binomial_model)
+
+# Calcular el AIC del modelo
+AIC(glm_binomial_model)
+
+# Calcular el BIC del modelo
+BIC(glm_binomial_model)
 
 ```
 **descripción** Las variables "native", "gender", "treatment" y "age" tienen efectos diferentes en la variable de respuesta "recover". El intercepto muestra una menor probabilidad de recuperación en ausencia de otras variables predictoras. El tratamiento se asocia con una mayor probabilidad de recuperación, mientras que la edad también influye de forma positiva enn en esta probabilidad.
