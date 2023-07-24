@@ -134,6 +134,7 @@ AIC(glm_poisson_model)
 ```{r}
 library(readxl)
 library(dplyr)
+library(ggplot2)
 
 # Cargar los datos
 glm_disease <- read_excel("glm.xlsx", sheet = "disease")
@@ -153,7 +154,6 @@ summary(glm_binomial_model)
 # Visualizar los coeficientes del modelo
 coef(glm_binomial_model)
 print(glm_binomial_model)
-plot(glm_binomial_model)
 
 # Calcular el AIC del modelo
 AIC(glm_binomial_model)
@@ -162,24 +162,29 @@ AIC(glm_binomial_model)
 BIC(glm_binomial_model)
 
 ```
-**descripción** Las variables "native", "gender", "treatment" y "age" tienen efectos diferentes en la variable de respuesta "recover". El intercepto muestra una menor probabilidad de recuperación en ausencia de otras variables predictoras. El tratamiento se asocia con una mayor probabilidad de recuperación, mientras que la edad también influye de forma positiva enn en esta probabilidad.
+**descripción** Se cargó la data y luego a las varibales native, gender, treatment y recover se las convirtio a factor para indicarle al modelo de que son variables categóricas y no numéricas .Las variables "native", "gender", "treatment" y "age" tienen efectos diferentes en la variable de respuesta "recover". El intercepto muestra una menor probabilidad de recuperación en ausencia de otras variables predictoras. El tratamiento se asocia con una mayor probabilidad de recuperación, mientras que la edad también influye de forma positiva enn en esta probabilidad. Según AIC y BIC son buenos modelos que se ajustan a los datos 
 
 
 
 #Análisis bayesiano para leishmania
 ```{r}
+# Cargar las librerías necesarias
+library(readxl)
+library(dplyr)
 library(rstanarm)
 
-glm_leishmania <- read_excel("glm.xlsx", sheet = "leishmania")
-View(glm_leishmania)
+# Cargar los datos
+glm_disease <- read_excel("glm.xlsx", sheet = "disease")
 
 # Realizar el análisis GLM bayesiano
-bayesian_glm_model <- stan_glm(recupera ~ percent_blast + percent_affect + percent_leuco + periferia_leuco + periferia_blast + temperature, data = glm_leishmania, family = gaussian())
+bayesian_glm_model <- stan_glm(recover ~ native + gender + treatment + age, data = glm_disease, family = binomial(link = "logit"))
 
-# Obtener un resumen del modelo
+# Obtener un resumen del modelo bayesiano
 summary(bayesian_glm_model)
-print(bayesian_glm_model)
-plot(bayesian_glm_model)
+
+# Obtener información sobre las distribuciones previas utilizadas en el modelo bayesiano
+prior_summary(bayesian_glm_model)
+
 
 ```
 **explicación** se obtuvo estimaciones de coeficientes para las variables predictoras que indican el efecto de cada una de ellas en la variable de respuesta "recupera".Se observó que un aumento en "percent_blast" se relaciona con un incremento en la variable de respuesta, mientras que un aumento en "percent_affect" se relaciona con una disminución en la variable de respuesta.
@@ -201,24 +206,155 @@ En el archivo `"ts.xlsx"` tiene tres datos:
 Realizar los siguientes análisis y respectivas interpretaciones: 
 
 1. Análisis exploratorio: autocorrelación y descomposición, análisis estacional.
-
+##QUAKES
 ```{r,series de tiempo }
+
 library(readxl)
 library(forecast)
 library(ggplot2)
+library(astsa)
 
-##QUAKES
+# Cargar el archivo de datos - Hoja "quakes"
 data_quakes <- read_excel("ts.xlsx", sheet = "quakes")
+
 quakes <- data_quakes$quakes
 
-# Datos en una serie de tiempo
+# Convertir los datos a serie de tiempo
 ts_quakes <- ts(data_quakes, start = c(2000, 1), frequency = 1)
 
 # Autocorrelación
 acf(ts_quakes, main = "Autocorrelation of quakes")
 
+# Intentar realizar la descomposición
+tryCatch(
+  {
+    decomposed_quakes <- decompose(ts_quakes)
+    plot(decomposed_quakes)
+  },
+  error = function(e) {
+   
+  }
+)
+
+# Modelos de pronóstico ARIMA
+model_arima_quakes <- auto.arima(ts_quakes[, 1])
+#SARIMA
+model_sarima_quakes <- auto.arima(ts_quakes[, 1], seasonal = TRUE)
+#ETS
+model_ets_quakes <- ets(ts_quakes[, 1])
+
+
+# Predicción a 20 años
+forecast_arima_quakes <- forecast(model_arima_quakes, h = 20)
+forecast_sarima_quakes <- forecast(model_sarima_quakes, h = 20)
+forecast_ets_quakes <- forecast(model_ets_quakes, h = 20)
+
+#  resultados
+plot(forecast_arima_quakes)
+plot(forecast_sarima_quakes)
+plot(forecast_ets_quakes)
+
+```
+#*descripción* En cuanto a los eventos de terremotos se puede observar que existe un patrón de tendencia creciente positiva y los eventos son estacionales a lo largo del tiempo mientras pasan los años se predice que el número de terremotos va aumentando 
+##HEPATITIS
+```{r}
+library(readxl)
+library(forecast)
+library(ggplot2)
+
+# Datos - Hoja "hepatitis"
+data_hepatitis <- read_excel("ts.xlsx", sheet = "hepatitis")
+
+# Acomodar la tabla 
+hepatitis_matrix <- as.matrix(data_hepatitis[, -1])
+
+# Serie de tiempo
+ts_hepatitis_univar <- ts(as.vector(hepatitis_matrix), start = c(2010, 1), frequency = 12)
+
+# Eliminación de valores faltantes
+ts_hepatitis_univar_clean <- na.omit(ts_hepatitis_univar)
+
+# Realizar el análisis de autocorrelación en la serie de tiempo limpia
+acf(ts_hepatitis_univar_clean, main = "Autocorrelation of hepatitis")
+
+
+# Descomposición
+decomposed_hepatitis <- decompose(ts_hepatitis_univar)
+plot(decomposed_hepatitis)
+
+# Modelos de pronóstico ARIMA
+model_arima_hepatitis <- auto.arima(ts_hepatitis_univar)
+#SARIMA
+model_sarima_hepatitis <- auto.arima(ts_hepatitis_univar, seasonal = TRUE)
+#ETS
+model_ets_hepatitis <- ets(ts_hepatitis_univar)
+
+# Validez  modelos
+accuracy(model_arima_hepatitis)
+accuracy(model_sarima_hepatitis)
+accuracy(model_ets_hepatitis)
+
+# Predicción a 24 meses
+forecast_arima_hepatitis <- forecast(model_arima_hepatitis, h = 24)
+forecast_sarima_hepatitis <- forecast(model_sarima_hepatitis, h = 24)
+forecast_ets_hepatitis <- forecast(model_ets_hepatitis, h = 24)
+
+# Visualización de los resultados
+plot(forecast_arima_hepatitis)
+plot(forecast_sarima_hepatitis)
+plot(forecast_ets_hepatitis)
+```
+#*descripción* De acuerdo a la descomposicion de la serie de tiempo del hepatitis, se puede observar que existen un patron de estacionariedad debido los valores se mantienen dentro de un rango y se repiten a lo largo del tiempo y se predice que para el 2020 el patrón casi no cambiara seguira lo mismo en cuanto a la hepatitis.
+##WILDFIRE
+```{r}
+library(readxl)
+library(forecast)
+library(ggplot2)
+
+# Data - Hoja "wildfire"
+data_wildfire <- read_excel("ts.xlsx", sheet = "wildfire")
+
+# Convertir los datos en una serie de tiempo
+ts_wildfire <- ts(data_wildfire$`Fire frequency`, start = c(2003, 1), frequency = 12)
+
+# Autocorrelación
+acf(ts_wildfire, main = "Autocorrelation of wildfire")
+
+# Descomposición
+decomposed_wildfire <- decompose(ts_wildfire)
+plot(decomposed_wildfire)
+
+# Modelos de pronóstico (ARIMA, SARIMA, ETS)
+model_arima_wildfire <- auto.arima(ts_wildfire)
+model_sarima_wildfire <- auto.arima(ts_wildfire, seasonal = TRUE)
+model_ets_wildfire <- ets(ts_wildfire)
+
+# Validez de los modelos
+accuracy(model_arima_wildfire)
+accuracy(model_sarima_wildfire)
+accuracy(model_ets_wildfire)
+
+# Predicción a 20 años (240 meses)
+forecast_arima_wildfire <- forecast(model_arima_wildfire, h = 180)
+forecast_sarima_wildfire <- forecast(model_sarima_wildfire, h = 180)
+forecast_ets_wildfire <- forecast(model_ets_wildfire, h = 180)
+
+# Visualización de los resultados
+plot(forecast_arima_wildfire)
+plot(forecast_sarima_wildfire)
+plot(forecast_ets_wildfire)
+
+# Gráfico de la descomposición
+plot(decomposed_wildfire$x, main = "Decomposition of wildfire", ylab = "Fire frequency")
+lines(decomposed_wildfire$trend, col = "blue", lwd = 2)      # Tendencia
+lines(decomposed_wildfire$seasonal, col = "red", lwd = 2)    # Componente estacional
+lines(decomposed_wildfire$random, col = "green", lwd = 2)     # Residuos
+legend("topright", legend = c("Original", "Trend", "Seasonal", "Residuals"), col = c("black", "blue", "red", "green"), lty = 1, lwd = 2)
+
+
 ```
 
+#*Descripción* En este caso se realizó la descomposicion de la serie de tiempo del wildfire donde, se puede observar que los en ciertas partes son estacionarias, pero en sí loa gráfica presenta un patron de estacionalidad debido a la tendencia que alta que tiene en el 2014, y todos los patrones no se mantienen dentro de la línea, aunque del 2015 al 2030 se predice que habrá un patrón estacionario.
 
 2. ARIMA, SARIMA, ETS, NNAR
 
