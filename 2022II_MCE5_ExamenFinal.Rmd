@@ -91,15 +91,18 @@ head(glm)
 str(glm)
 summary(glm)
 ```
-**descripción** Se realizó un análisis exploratorio de la data glm, esta data contiene información  de insecticidas para controlar el número de mosquitos, donde se cargo la data, se usó la librería readxl, con view(glm) se visualizó la información, head(glm) para visualizar los primeros  6 datos,  str(glm) para viszualizar si las variables son numéricas o categóricas. 
+**descripción** Se realizó un análisis exploratorio de la data glm, esta data contiene información  de insecticidas para controlar el número de mosquitos, donde se cargo la data, se usó la librería readxl, con view(glm) se visualizó la información, head(glm) para visualizar los primeros  6 datos,  str(glm) para visualizar si las variables son numéricas o categóricas.
+
+En el resumen estadístistico se puede observar como se distriubuyen los datos de acuerdo a las variables en ese caso se ve que  la repetición va de 1 a 6, donde el número de repeticiones mínimo es 1 y el máximo 6. Aedes muestra la cantidad de mosquitos que ha sobrevivido de acuerdo al número de repeticiones y a los tipos de insecticidas aplicados el valor más bajo de insectos sobrevivientes es 44 y el más alto(máximo) es de 3020 mosquitos vivos.  
+
 #2_Planteamiento de hipótesis para cada modelo
 
-**hipótesis**la Aplicación repetida de insecticidas en un experimento para controlar el número de mosquitos de Aedes reduce efectivamente su población.a.
+**hipótesis**la Aplicación repetida de insecticidas en un experimento para controlar el número de mosquitos de Aedes reduce efectivamente su población.
 
-**Hipótesis**: La edad tiene un efecto en la presencia o ausencia de las variables
 
 **Hipótesis**: Las variables relacionadas con la concentración y afectación de ciertas células se relacionan con la presencia/ausencia de infección causad por leishmania.
 
+**Hipótesis**: La edad tiene un efecto en la presencia o ausencia de las variables
 
 
 #3_Análisis de regresión para aedes, leishmania, disease
