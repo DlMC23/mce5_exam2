@@ -108,13 +108,14 @@ En el resumen estadístistico se puede observar como se distriubuyen los datos d
 #3_Análisis de regresión para aedes, leishmania, disease
 
 #Análisis GLM poisson en aedes
-```{r}
+```{r, poisson GLM}
+
 glm <- read_excel("glm.xlsx", sheet = "aedes")
 
 # Convertir la variable a factor
 glm$agrochem <- factor(glm$agrochem)
 
-# Realizar el análisis GLM Poisson
+# Análisis GLM Poisson
 glm_poisson_model <- glm(aedes ~ agrochem + repetition, data = glm, family = poisson)
 summary(glm_poisson_model)
 
@@ -124,7 +125,7 @@ print(glm_poisson_model)
 #vizualización 
 plot(glm_poisson_model)
 ```
-**Descripción** la variable agroquimica tiene efecto significativo en la variable de respuesta. Los todos los niveles de los agroquimicos,se relacionan con la disminucion en la cantidad de mosquitos con el nivel A, mientras mas repeticiones hay se reduce el número demoquitos 
+**Descripción** Poisson se utilizó para analizar la variable respuesta AEDES(número de mosquitos vivos) en función de las variables predictorias AGROCHEM y REPETICIONES. Donde se obtiene que la variable agrochem y el número de repeticiones (predictorias) tiene efecto significativo en la la cantidad de mosquitos que sobreviven. Todos los niveles de los agroquimicos,se relacionan con la disminucion en la cantidad de mosquitos con el nivel A, mientras mas repeticiones hay se reduce el número de moquitos pero tambien se puede observar que el mejor tipo de agrochem es el E al realizar el número de repeticiones con el tipo de agrochem E, reduce el mayor número de moquitos en comparacion a los demas agrochem.
 
 #Análisis GLMs binomiales en disease
 ```{r}
