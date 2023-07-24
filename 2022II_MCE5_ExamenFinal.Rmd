@@ -386,7 +386,100 @@ Seleccione una especie de planta y una especie de animal; asimismo, dos tipos de
 
 - Chirimoya: *Anona cherimola*
 
-Luego realice un análisis espacial de distribución de la especie en Ecuador continental en base a los datos de presencia del GBIF (use rgbif para descargar la data). Explique el resultado y compare la diferencia entre la salida de los dos modelos. En qué regiones los modelos difieren más en la predicción?   
+Luego realice un análisis espacial de distribución de la especie en Ecuador continental en base a los datos de presencia del GBIF (use rgbif para descargar la data). Explique el resultado y compare la diferencia entre la salida de los dos modelos. En qué regiones los modelos difieren más en la predicción?  
+
+
+```{r}
+# Cargar paquetes necesarios
+library(rgbif)
+library(sp)
+library(randomForest)
+library(mgcv)
+
+# Especificar la especie seleccionada
+especie <- "Nasua nasua"  
+
+# Obtener los datos de presencia del GBIF para Ecuador continental
+datos_presencia <- occ_search(taxonKey = name_backbone(especie)$speciesKey, country = "EC", hasCoordinate = TRUE, limit = 10000)
+
+# Filtrar y limpiar los datos
+datos_presencia <- datos_presencia$data
+datos_presencia <- na.omit(datos_presencia[, c("decimalLongitude", "decimalLatitude")])
+coordenadas <- data.frame(x = datos_presencia$decimalLongitude, y = datos_presencia$decimalLatitude)
+
+# Dividir los datos en conjuntos de entrenamiento y prueba
+set.seed(123)
+indices_entrenamiento <- sample(nrow(coordenadas), floor(0.7 * nrow(coordenadas)))
+datos_entrenamiento <- coordenadas[indices_entrenamiento, ]
+datos_prueba <- coordenadas[-indices_entrenamiento, ]
+
+# Modelado: Bosques Aleatorios (rf)
+modelo_rf <- randomForest(x ~ y, data = datos_entrenamiento, ntree = 100)
+
+# Modelado: Generalized Additive Model (gam)
+modelo_gam <- gam(x ~ s(y), data = datos_entrenamiento)
+
+# Evaluar el desempeño de los modelos
+prediccion_rf <- predict(modelo_rf, newdata = datos_prueba)
+prediccion_gam <- predict(modelo_gam, newdata = datos_prueba)
+
+# Comparar las predicciones de los modelos
+diferencias <- abs(prediccion_rf - prediccion_gam)
+
+# Visualizar las diferencias de predicción
+plot(diferencias, col = rev(heat.colors(15)), main = "Diferencias de predicción entre modelos")
+
+```
+*descripcion* Se obtuvieron datos de presencia de la especie "Nasua nasua" del GBIF para Ecuador . Luego, se limpiaron y filtraron los datos para su análisis posteriormente se dividieron los datos en conjuntos de entrenamiento y prueba, se ajustaron los modelos uno de Bosques Aleatorios (Random Forest) y otro de Regresión Generalizada Aditiva (GAM). Finalmente, se compararon las predicciones de ambos modelos y se visualizaron las diferencias entre ellos dentro de un gráfico.
+
+
+```{r}
+# Cargar paquetes necesarios
+library(rgbif)
+library(sp)
+library(randomForest)
+library(mgcv)
+
+# Especificar la especie seleccionada
+especie <- "Passiflora edulis"  
+
+# Obtener los datos de presencia del GBIF para Ecuador continental
+datos_presencia <- occ_search(taxonKey = name_backbone(especie)$speciesKey, country = "EC", hasCoordinate = TRUE, limit = 10000)
+
+# Filtrar y limpiar los datos
+datos_presencia <- datos_presencia$data
+datos_presencia <- na.omit(datos_presencia[, c("decimalLongitude", "decimalLatitude")])
+coordenadas <- data.frame(x = datos_presencia$decimalLongitude, y = datos_presencia$decimalLatitude)
+
+# Dividir los datos en conjuntos de entrenamiento y prueba
+set.seed(123)
+indices_entrenamiento <- sample(nrow(coordenadas), floor(0.7 * nrow(coordenadas)))
+datos_entrenamiento <- coordenadas[indices_entrenamiento, ]
+datos_prueba <- coordenadas[-indices_entrenamiento, ]
+
+# Modelado: Bosques Aleatorios (rf)
+modelo_rf <- randomForest(x ~ y, data = datos_entrenamiento, ntree = 100)
+
+# Modelado: Generalized Additive Model (gam)
+modelo_gam <- gam(y ~ s(x), data = datos_entrenamiento)
+
+# Evaluar el desempeño de los modelos
+prediccion_rf <- predict(modelo_rf, newdata = datos_prueba)
+prediccion_gam <- predict(modelo_gam, newdata = datos_prueba)
+
+# Verificar que los objetos tengan la misma longitud
+if (length(prediccion_rf) != length(prediccion_gam)) {
+  stop("Las longitudes de los objetos de predicción no coinciden.")
+}
+
+# Comparar las predicciones de los modelos
+diferencias <- abs(prediccion_rf - prediccion_gam)
+
+# Visualizar las diferencias de predicción
+plot(diferencias, col = rev(heat.colors(10)), main = "Diferencias de predicción entre modelos")
+
+```
+*descripción* Se realizó un analisis de predicción para determinar determinar la distribución del Passiflora edulis a lo largo del tiempo y ver como su area de distribución cambia tambiem se realizó una comparacion depara determinar las diferencias que existen entre los modelos y como estas me predicen.  
 
 
 
